@@ -23,6 +23,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Button;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -33,11 +34,20 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.FillFormatter;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.Channel;
+import org.json.JSONException;
+import org.json.JSONObject;
+import rabbitmqconfig.MQConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
+
+import static rabbitmqconfig.MQConfiguration.SENDING_QUEUE;
 
 public class MainActivity extends Activity {
     ArrayList<Entry> yVals;
@@ -46,6 +56,7 @@ public class MainActivity extends Activity {
     public static Typeface tf;
     ImageButton infoButton;
     ImageButton refreshButton;
+    Button saveDataButton;
     LineChart mChart;
     TextView minVal;
     TextView maxVal;
@@ -127,6 +138,36 @@ public class MainActivity extends Activity {
                 builder.create().show();
             }
         });
+
+       final DecimalFormat df1 = new DecimalFormat("####.0");
+        saveDataButton=(Button)findViewById(R.id.buttonSave);
+        saveDataButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject soundData = new JSONObject();
+                try {
+                    soundData.put("minimumValue", df1.format(World.minDB));
+                    soundData.put("averageValue", df1.format((World.minDB+World.maxDB)/2));
+                    soundData.put("maximumValue", df1.format(World.maxDB));
+                    soundData.put("realTimeValue", df1.format(World.dbCount));
+                    System.out.println("sound  "+soundData);
+                    final Channel channel = MQConfiguration.createQueue();
+                    String callbackQueueName = channel.queueDeclare().getQueue();
+                    final String corrId = UUID.randomUUID().toString();
+                    BasicProperties props;
+                    props = new BasicProperties
+                            .Builder()
+                            .correlationId(corrId)
+                            .replyTo(callbackQueueName)
+                            .build();
+                    channel.basicPublish("", SENDING_QUEUE, props, soundData.toString().getBytes("UTF-8"));
+                    System.out.println(" !!! Data sent:   "+soundData.toString());
+                } catch (IOException | JSONException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        });
+
         refreshButton=(ImageButton)findViewById(R.id.refreshbutton);
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
