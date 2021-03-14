@@ -7,10 +7,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Bundle;
+import android.icu.util.Output;
+import android.os.*;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
@@ -34,18 +32,22 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.FillFormatter;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.opencsv.CSVReader;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import org.json.JSONException;
 import org.json.JSONObject;
 import rabbitmqconfig.MQConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+
+import com.opencsv.CSVWriter;
 
 import static rabbitmqconfig.MQConfiguration.SENDING_QUEUE;
 
@@ -117,6 +119,7 @@ public class MainActivity extends Activity {
             window.setNavigationBarColor(Color.TRANSPARENT);
         }
         setContentView(R.layout.activity_main);
+        final Channel channel = MQConfiguration.createQueue();
         tf= Typeface.createFromAsset(this.getAssets(), "fonts/Let_s go Digital Regular.ttf");
         minVal=(TextView)findViewById(R.id.minval);minVal.setTypeface(tf);
         mmVal=(TextView)findViewById(R.id.mmval);mmVal.setTypeface(tf);
@@ -146,12 +149,12 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 JSONObject soundData = new JSONObject();
                 try {
+                    soundData.put("id", 1);
                     soundData.put("minimumValue", df1.format(World.minDB));
                     soundData.put("averageValue", df1.format((World.minDB+World.maxDB)/2));
                     soundData.put("maximumValue", df1.format(World.maxDB));
                     soundData.put("realTimeValue", df1.format(World.dbCount));
                     System.out.println("sound  "+soundData);
-                    final Channel channel = MQConfiguration.createQueue();
                     String callbackQueueName = channel.queueDeclare().getQueue();
                     final String corrId = UUID.randomUUID().toString();
                     BasicProperties props;
@@ -165,8 +168,40 @@ public class MainActivity extends Activity {
                 } catch (IOException | JSONException e) {
                     System.out.println(e.getMessage());
                 }
+//               List<String[]> csvData = createCsvDataSimple(df1);
+//                File directory = getFilesDir(); //or getExternalFilesDir(null); for external storage
+//                File file = new File(directory,"test.csv");
+//                try (CSVWriter writer = new CSVWriter(new FileWriter("H:\\Masters-Bamberg\\Semester3\\MobiProj\\Sound-Meter-master\\test.csv"))) {
+//                    writer.writeAll(csvData);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+//
+//                    File csvfile = new File(getFilesDir() + "/test.csv");  // /data/user/0/com.bodekjan.soundmeter/files/test.csv or do getStorageDirectory()
+//                    System.out.println("work "+csvfile.getAbsolutePath());
+//                CSVWriter writer = null;
+//                try {
+//                    writer = new CSVWriter(new FileWriter(csvfile.getAbsolutePath()));
+//                    writer.writeAll(csvData);
+//                } catch (IOException ioException) {
+//                    ioException.printStackTrace();
+//                }
+
+//                InputStream is = getResources().openRawResource(R.raw.test);
+//                try (FileWriter writer = new FileWriter(is);
+//                     BufferedWriter bw = new BufferedWriter(writer)) {
+//
+//                    bw.write(csvData);
+//
+//                } catch (IOException e) {
+//                    System.err.format("IOException: %s%n", e);
+//                }
+
             }
         });
+
+
 
         refreshButton=(ImageButton)findViewById(R.id.refreshbutton);
         refreshButton.setOnClickListener(new View.OnClickListener() {
@@ -185,6 +220,16 @@ public class MainActivity extends Activity {
         mRecorder = new MyMediaRecorder();
     }
 
+    private static List<String[]> createCsvDataSimple(DecimalFormat df1) {
+        String[] header = {"id", "minimumValue", "averageValue", "maximumValue", "realTimeValue"};
+        String[] record1 = {"1", df1.format(World.minDB), df1.format((World.minDB+World.maxDB)/2),
+                df1.format(World.maxDB), df1.format(World.dbCount)};
+        List<String[]> list = new ArrayList<>();
+        list.add(header);
+        list.add(record1);
+
+        return list;
+    }
     private void updateData(float val, long time) {
         if(mChart==null){
             return;
