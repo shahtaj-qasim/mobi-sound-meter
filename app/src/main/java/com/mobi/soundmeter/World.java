@@ -1,6 +1,4 @@
-package com.bodekjan.soundmeter;
-
-import android.util.Log;
+package com.mobi.soundmeter;
 
 
 public class World {

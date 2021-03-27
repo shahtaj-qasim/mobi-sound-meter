@@ -1,4 +1,4 @@
-package com.bodekjan.soundmeter;
+package com.mobi.soundmeter;
 
 import android.app.Dialog;
 import android.content.Context;

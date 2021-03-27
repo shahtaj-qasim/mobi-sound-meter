@@ -1,6 +1,5 @@
-package com.bodekjan.soundmeter;
+package com.mobi.soundmeter;
 
-import android.app.Application;
 //import android.test.ApplicationTestCase;
 
 /**

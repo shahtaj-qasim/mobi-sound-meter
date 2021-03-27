@@ -17,6 +17,19 @@ buildscript {
     }
 }
 
+subprojects {
+    afterEvaluate {
+        project ->
+            if (project.hasProperty("android")) {
+                android {
+                    compileSdkVersion = 30
+                    buildToolsVersion = "30.0.3"
+                }
+            }
+    }
+}
+
+
 allprojects {
     repositories {
         jcenter()

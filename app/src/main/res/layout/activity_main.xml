@@ -4,15 +4,15 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:background="@drawable/bg_page"
+              android:background="#f58742"
               android:orientation="vertical"
-              tools:context="com.bodekjan.soundmeter.MainActivity">
+              tools:context="com.mobi.soundmeter.MainActivity">
 
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1">
-        <com.bodekjan.soundmeter.Speedometer
+        <com.mobi.soundmeter.Speedometer
                 android:id="@+id/speed"
                 android:layout_centerInParent="true"
                 android:layout_width="280dp"
@@ -52,6 +52,16 @@
                 android:layout_marginBottom="16dp"
                 android:visibility="gone"
                 android:scaleType="fitCenter" />
+        <ImageButton
+                android:id="@+id/education"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|bottom"
+                android:layout_marginLeft="16dp"
+                android:layout_marginBottom="30dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/health" />
+
     </FrameLayout>
 
     <LinearLayout
