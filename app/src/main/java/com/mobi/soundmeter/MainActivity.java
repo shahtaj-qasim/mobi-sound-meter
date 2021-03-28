@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
     public static Typeface tf;
     ImageButton infoButton;
     ImageButton refreshButton, Health;
-    Button saveDataButton;
+    Button saveDataButton, stopButton;
     LineChart mChart;
     TextView minVal;
     TextView maxVal;
@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     long savedTime=0;
     boolean isChart=false;
     boolean isMoney=false;
+    boolean stopClicked=false;
     /* Decibel */
     private boolean bListener = true;
     private boolean isThreadRun = true;
@@ -63,6 +64,8 @@ public class MainActivity extends Activity {
     float volume = 10000;
     int refresh=0;
     private MyMediaRecorder mRecorder ;
+    int id=0;
+
 
     final Handler handler = new Handler(){
         @Override
@@ -107,7 +110,7 @@ public class MainActivity extends Activity {
             window.setNavigationBarColor(Color.TRANSPARENT);
         }
         setContentView(R.layout.activity_main);
-        final Channel channel = MQConfiguration.createQueue();
+
         tf= Typeface.createFromAsset(this.getAssets(), "fonts/Let_s go Digital Regular.ttf");
         minVal=(TextView)findViewById(R.id.minval);minVal.setTypeface(tf);
         mmVal=(TextView)findViewById(R.id.mmval);mmVal.setTypeface(tf);
@@ -130,64 +133,29 @@ public class MainActivity extends Activity {
             }
         });
 
-       final DecimalFormat df1 = new DecimalFormat("####.0");
         saveDataButton=(Button)findViewById(R.id.buttonSave);
+        stopButton=(Button)findViewById(R.id.buttonStop);
         saveDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject soundData = new JSONObject();
-                try {
-                    soundData.put("id", 1);
-                    soundData.put("minimumValue", df1.format(World.minDB));
-                    soundData.put("averageValue", df1.format((World.minDB+World.maxDB)/2));
-                    soundData.put("maximumValue", df1.format(World.maxDB));
-                    soundData.put("realTimeValue", df1.format(World.dbCount));
-                    System.out.println("sound  "+soundData);
-                    String callbackQueueName = channel.queueDeclare().getQueue();
-                    final String corrId = UUID.randomUUID().toString();
-                    BasicProperties props;
-                    props = new BasicProperties
-                            .Builder()
-                            .correlationId(corrId)
-                            .replyTo(callbackQueueName)
-                            .build();
-                    channel.basicPublish("", SENDING_QUEUE, props, soundData.toString().getBytes("UTF-8"));
-                    System.out.println(" !!! Data sent:   "+soundData.toString());
-                } catch (IOException | JSONException e) {
-                    System.out.println(e.getMessage());
-                }
-//               List<String[]> csvData = createCsvDataSimple(df1);
-//                File directory = getFilesDir(); //or getExternalFilesDir(null); for external storage
-//                File file = new File(directory,"test.csv");
-//                try (CSVWriter writer = new CSVWriter(new FileWriter("H:\\Masters-Bamberg\\Semester3\\MobiProj\\Sound-Meter-master\\test.csv"))) {
-//                    writer.writeAll(csvData);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
+                stopClicked = false;
+                saveDataButton.setVisibility(View.INVISIBLE);
+                stopButton.setVisibility(View.VISIBLE);
 
-//
-//                    File csvfile = new File(getFilesDir() + "/test.csv");  // /data/user/0/com.bodekjan.soundmeter/files/test.csv or do getStorageDirectory()
-//                    System.out.println("work "+csvfile.getAbsolutePath());
-//                CSVWriter writer = null;
-//                try {
-//                    writer = new CSVWriter(new FileWriter(csvfile.getAbsolutePath()));
-//                    writer.writeAll(csvData);
-//                } catch (IOException ioException) {
-//                    ioException.printStackTrace();
-//                }
-
-//                InputStream is = getResources().openRawResource(R.raw.test);
-//                try (FileWriter writer = new FileWriter(is);
-//                     BufferedWriter bw = new BufferedWriter(writer)) {
-//
-//                    bw.write(csvData);
-//
-//                } catch (IOException e) {
-//                    System.err.format("IOException: %s%n", e);
-//                }
-
+                Thread thread = new Thread(runnable);
+                thread.start();
             }
         });
+
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopButton.setVisibility(View.INVISIBLE);
+                saveDataButton.setVisibility(View.VISIBLE);
+                stopClicked = true;
+            }
+        });
+
 
 
 
@@ -217,18 +185,38 @@ public class MainActivity extends Activity {
         });
     }
 
+    Runnable runnable = new Runnable() {
+        final DecimalFormat df1 = new DecimalFormat("####.0");
+        final Channel channel = MQConfiguration.createQueue();
+        public void run() {
+            while (!stopClicked) {
+                JSONObject soundData = new JSONObject();
+                try {
+                    soundData.put("id", id);
+                    soundData.put("minimumValue", df1.format(World.minDB));
+                    soundData.put("averageValue", df1.format((World.minDB + World.maxDB) / 2));
+                    soundData.put("maximumValue", df1.format(World.maxDB));
+                    soundData.put("realTimeValue", df1.format(World.dbCount));
+                    System.out.println("sound  " + soundData);
+                    String callbackQueueName = channel.queueDeclare().getQueue();
+                    final String corrId = UUID.randomUUID().toString();
+                    BasicProperties props;
+                    props = new BasicProperties
+                            .Builder()
+                            .correlationId(corrId)
+                            .replyTo(callbackQueueName)
+                            .build();
+                    channel.basicPublish("", SENDING_QUEUE, props, soundData.toString().getBytes("UTF-8"));
+                    System.out.println(" !!! Data sent:   " + soundData.toString());
+                } catch (IOException | JSONException e) {
+                    System.out.println(e.getMessage());
+                }
+                // if(saveDataButton.isSelected()){break;}
+                id = id + 1;
+            }
+        }
+    };
 
-
-    private static List<String[]> createCsvDataSimple(DecimalFormat df1) {
-        String[] header = {"id", "minimumValue", "averageValue", "maximumValue", "realTimeValue"};
-        String[] record1 = {"1", df1.format(World.minDB), df1.format((World.minDB+World.maxDB)/2),
-                df1.format(World.maxDB), df1.format(World.dbCount)};
-        List<String[]> list = new ArrayList<>();
-        list.add(header);
-        list.add(record1);
-
-        return list;
-    }
     private void updateData(float val, long time) {
         if(mChart==null){
             return;
