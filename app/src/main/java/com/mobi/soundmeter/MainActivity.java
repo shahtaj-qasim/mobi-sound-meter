@@ -31,6 +31,8 @@ import org.json.JSONObject;
 import rabbitmqconfig.MQConfiguration;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,6 +67,7 @@ public class MainActivity extends Activity {
     int refresh=0;
     private MyMediaRecorder mRecorder ;
     int id=0;
+    final String corrId = UUID.randomUUID().toString();
 
 
     final Handler handler = new Handler(){
@@ -186,20 +189,21 @@ public class MainActivity extends Activity {
     }
 
     Runnable runnable = new Runnable() {
-        final DecimalFormat df1 = new DecimalFormat("####.0");
+        //final Double df1 = new Double("####.0");
         final Channel channel = MQConfiguration.createQueue();
         public void run() {
             while (!stopClicked) {
                 JSONObject soundData = new JSONObject();
                 try {
                     soundData.put("id", id);
-                    soundData.put("minimumValue", df1.format(World.minDB));
-                    soundData.put("averageValue", df1.format((World.minDB + World.maxDB) / 2));
-                    soundData.put("maximumValue", df1.format(World.maxDB));
-                    soundData.put("realTimeValue", df1.format(World.dbCount));
+                    soundData.put("minimumValue", (new BigDecimal(World.minDB).setScale(2, RoundingMode.DOWN)).doubleValue());
+                    soundData.put("averageValue",new BigDecimal(((World.minDB + World.maxDB) / 2)).setScale(2, RoundingMode.DOWN).doubleValue());
+                    soundData.put("maximumValue", (new BigDecimal(World.maxDB).setScale(2, RoundingMode.DOWN)).doubleValue());
+                    soundData.put("realTimeValue", (new BigDecimal(World.dbCount).setScale(2, RoundingMode.DOWN)).doubleValue());
+                    Long tsLong = System.currentTimeMillis()/1000;
+                    soundData.put("timestamp", tsLong);
                     System.out.println("sound  " + soundData);
                     String callbackQueueName = channel.queueDeclare().getQueue();
-                    final String corrId = UUID.randomUUID().toString();
                     BasicProperties props;
                     props = new BasicProperties
                             .Builder()
@@ -207,7 +211,7 @@ public class MainActivity extends Activity {
                             .replyTo(callbackQueueName)
                             .build();
                     channel.basicPublish("", SENDING_QUEUE, props, soundData.toString().getBytes("UTF-8"));
-                    System.out.println(" !!! Data sent:   " + soundData.toString());
+                    System.out.println(" !!! Data sent:   " + soundData.toString()+ "corrId "+corrId);
                 } catch (IOException | JSONException e) {
                     System.out.println(e.getMessage());
                 }
