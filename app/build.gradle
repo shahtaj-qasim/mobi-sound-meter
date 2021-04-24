@@ -1,11 +1,17 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
-        applicationId "com.bodekjan.soundmeter"
+        applicationId "com.mobi.soundmeter"
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 4
@@ -19,11 +25,12 @@ android {
     }
     repositories {
         maven { url "https://jitpack.io" }
+
      }
 }
 
 dependencies {
-    implementation group: 'com.rabbitmq', name: 'amqp-client', version: '4.11.3'
+    implementation group: 'com.rabbitmq', name: 'amqp-client', version: '5.7.1' //4.11.3
     compile 'org.slf4j:slf4j-simple:1.7.30'
     // https://mvnrepository.com/artifact/com.opencsv/opencsv
     implementation group: 'com.opencsv', name: 'opencsv', version: '3.7'
@@ -33,4 +40,8 @@ dependencies {
 //    compile 'com.github.glomadrian:velocimeterlibrary:1.0@aar'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.0-beta1'
     compile 'com.github.neopixl:PixlUI:v1.1.0'
+    implementation "androidx.core:core-ktx:+"
+    //implementation platform('com.google.firebase:firebase-bom:27.1.0')
+    implementation 'com.google.firebase:firebase-analytics:18.0.3'
+    implementation 'com.google.firebase:firebase-database:19.7.0'
 }

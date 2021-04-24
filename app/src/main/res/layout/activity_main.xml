@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:background="#f58742"
+              android:background="#707070"
               android:orientation="vertical"
               tools:context="com.mobi.soundmeter.MainActivity">
 
@@ -107,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/activity_avglabel"
                     android:id="@+id/avglabel"
-                    android:textColor="@color/external_progress2" />
+                    android:textColor="@color/external_progress2"/>
 
             <TextView
                     android:layout_width="wrap_content"
@@ -115,9 +115,12 @@
                     android:text="23 Db"
                     android:textSize="36dp"
                     android:id="@+id/mmval"
-                    android:textColor="#ffffff" />
+                    android:textColor="#ffffff"/>
+            <Button
+                    android:text="View Analysis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:id="@+id/buttonViewAnalysis"/>
         </LinearLayout>
-
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -173,7 +176,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Start Recording" />
+                android:text="Start Recording"/>
         <Button
                 android:id="@+id/buttonStop"
                 android:layout_width="wrap_content"

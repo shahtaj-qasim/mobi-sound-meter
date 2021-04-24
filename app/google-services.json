@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "839379151294",
+    "project_id": "mobi-soundcity",
+    "storage_bucket": "mobi-soundcity.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:839379151294:android:cbe67c74f6d7e1f19871ef",
+        "android_client_info": {
+          "package_name": "com.mobi.soundmeter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "839379151294-8juiun2augd6b4nelsqruj8t6vh7bvsq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mobi.soundmeter",
+            "certificate_hash": "7f5d7eb566fea29ce2c45612c9961c7eeef4578b"
+          }
+        },
+        {
+          "client_id": "839379151294-bhn4sa3qvlqm5ucpgpqfkh63dohk5lfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjZWNCYvtRt5caWu2v3ivA9D2PVFT41Ac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "839379151294-bhn4sa3qvlqm5ucpgpqfkh63dohk5lfm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

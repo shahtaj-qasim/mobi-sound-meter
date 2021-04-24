@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.*;
 import android.view.View;
 import android.view.Window;
@@ -24,6 +27,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.FillFormatter;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import org.json.JSONException;
@@ -34,12 +38,15 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-import static rabbitmqconfig.MQConfiguration.SENDING_QUEUE;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.google.firebase.database.*;
+
+
+import static rabbitmqconfig.MQConfiguration.*;
 
 public class MainActivity extends Activity {
     ArrayList<Entry> yVals;
@@ -59,6 +66,9 @@ public class MainActivity extends Activity {
     boolean isChart=false;
     boolean isMoney=false;
     boolean stopClicked=false;
+    double latitude, longitude;
+    Geocoder geocoder;
+    List<Address> addresses;
     /* Decibel */
     private boolean bListener = true;
     private boolean isThreadRun = true;
@@ -68,7 +78,15 @@ public class MainActivity extends Activity {
     private MyMediaRecorder mRecorder ;
     int id=0;
     final String corrId = UUID.randomUUID().toString();
+    final Channel channel = MQConfiguration.createQueue();
+    BasicProperties props;
+    String callbackQueueName = channel.queueDeclare().getQueue();
 
+    String avgResult, sumResult, minResult, maxResult;
+    String[] parts;
+    String postalCodeResult, cityResult, timestampResult;
+    FirebaseDatabase db= FirebaseDatabase.getInstance();
+    private DatabaseReference root = db.getReference().child("NoiseData");
 
     final Handler handler = new Handler(){
         @Override
@@ -97,6 +115,10 @@ public class MainActivity extends Activity {
             }
         }
     };
+
+    public MainActivity() throws IOException {
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +133,17 @@ public class MainActivity extends Activity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
+            getLocation();
         }
+        ///////////////////////////LOCATION PERMISSION CHECK///////////////////////////////
+        try {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
         setContentView(R.layout.activity_main);
 
         tf= Typeface.createFromAsset(this.getAssets(), "fonts/Let_s go Digital Regular.ttf");
@@ -136,6 +168,7 @@ public class MainActivity extends Activity {
             }
         });
 
+
         saveDataButton=(Button)findViewById(R.id.buttonSave);
         stopButton=(Button)findViewById(R.id.buttonStop);
         saveDataButton.setOnClickListener(new View.OnClickListener() {
@@ -144,9 +177,16 @@ public class MainActivity extends Activity {
                 stopClicked = false;
                 saveDataButton.setVisibility(View.INVISIBLE);
                 stopButton.setVisibility(View.VISIBLE);
+                props = new BasicProperties
+                        .Builder()
+                        .correlationId(corrId)
+                        .replyTo(callbackQueueName)
+                        .build();
 
                 Thread thread = new Thread(runnable);
                 thread.start();
+
+
             }
         });
 
@@ -156,11 +196,13 @@ public class MainActivity extends Activity {
                 stopButton.setVisibility(View.INVISIBLE);
                 saveDataButton.setVisibility(View.VISIBLE);
                 stopClicked = true;
+                //consume from rabbitmq
+                Thread thread = new Thread(runnableForConsume);
+                thread.start();
+
             }
         });
-
-
-
+        
 
         refreshButton=(ImageButton)findViewById(R.id.refreshbutton);
         refreshButton.setOnClickListener(new View.OnClickListener() {
@@ -188,38 +230,69 @@ public class MainActivity extends Activity {
         });
     }
 
+    Runnable runnableForConsume = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                String ctag = channel.basicConsume(RECEIVING_QUEUE, true, (consumerTag, delivery) -> {
+                    String msg = new String(delivery.getBody(), "UTF-8");
+                    //real time attribute results
+                    parts = msg.split("\\|");
+                    avgResult = parts[1];
+                    sumResult = parts[2];
+                    minResult = parts[3];
+                    maxResult = parts[4];
+                    postalCodeResult = parts[5];
+                    cityResult = parts[6];
+                    timestampResult = parts[7];
+                    postalCodeResult = postalCodeResult.replace("[", "");
+                    postalCodeResult = postalCodeResult.replace("]", "");
+                    cityResult = cityResult.replace("[", "");
+                    cityResult = cityResult.replace("]", "");
+
+
+
+                    System.out.println("!!! Received response in client:  '" +avgResult + sumResult + minResult + maxResult + postalCodeResult + cityResult+ timestampResult+"'");
+                }, consumerTag -> {
+                });
+                channel.basicCancel(ctag);
+
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    };
+
     Runnable runnable = new Runnable() {
-        //final Double df1 = new Double("####.0");
-        final Channel channel = MQConfiguration.createQueue();
+
+        @Override
         public void run() {
             while (!stopClicked) {
                 JSONObject soundData = new JSONObject();
                 try {
                     soundData.put("id", id);
                     soundData.put("minimumValue", (new BigDecimal(World.minDB).setScale(2, RoundingMode.DOWN)).doubleValue());
-                    soundData.put("averageValue",new BigDecimal(((World.minDB + World.maxDB) / 2)).setScale(2, RoundingMode.DOWN).doubleValue());
+                    soundData.put("averageValue", new BigDecimal(((World.minDB + World.maxDB) / 2)).setScale(2, RoundingMode.DOWN).doubleValue());
                     soundData.put("maximumValue", (new BigDecimal(World.maxDB).setScale(2, RoundingMode.DOWN)).doubleValue());
                     soundData.put("realTimeValue", (new BigDecimal(World.dbCount).setScale(2, RoundingMode.DOWN)).doubleValue());
-                    Long tsLong = System.currentTimeMillis()/1000;
+                    soundData.put("latitude", latitude);
+                    soundData.put("longitude", longitude);
+                    soundData.put("postalCode",getPostalCode());
+                    soundData.put("city",getCityName());
+                    Long tsLong = System.currentTimeMillis() / 1000;
                     soundData.put("timestamp", tsLong);
                     System.out.println("sound  " + soundData);
-                    String callbackQueueName = channel.queueDeclare().getQueue();
-                    BasicProperties props;
-                    props = new BasicProperties
-                            .Builder()
-                            .correlationId(corrId)
-                            .replyTo(callbackQueueName)
-                            .build();
+
+
                     channel.basicPublish("", SENDING_QUEUE, props, soundData.toString().getBytes("UTF-8"));
-                    System.out.println(" !!! Data sent:   " + soundData.toString()+ "corrId "+corrId);
                 } catch (IOException | JSONException e) {
                     System.out.println(e.getMessage());
                 }
-                // if(saveDataButton.isSelected()){break;}
                 id = id + 1;
+
             }
         }
-    };
+        };
 
     private void updateData(float val, long time) {
         if(mChart==null){
@@ -241,6 +314,40 @@ public class MainActivity extends Activity {
             savedTime++;
         }
     }
+
+    public void getLocation(){
+        GpsTracker gpsTracker = new GpsTracker(MainActivity.this);
+        if(gpsTracker.canGetLocation()){
+            latitude = gpsTracker.getLatitude();
+            longitude =  gpsTracker.getLongitude();
+        }else{
+            gpsTracker.showSettingsAlert();
+        }
+
+    }
+    private String getPostalCode() throws IOException {
+
+        geocoder = new Geocoder(this, Locale.getDefault());
+
+        addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+
+       // String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+      //  String city = addresses.get(0).getLocality();
+      //  String state = addresses.get(0).getAdminArea();
+      //  String country = addresses.get(0).getCountryName();
+        String postalCode = addresses.get(0).getPostalCode();
+      //  String knownName = addresses.get(0).getFeatureName();
+        return postalCode;
+    }
+
+    private String getCityName() throws IOException {
+        geocoder = new Geocoder(this, Locale.getDefault());
+        addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+        String city = addresses.get(0).getLocality();
+        return city;
+    }
+
+
     private void initChart() {
         if(mChart!=null){
             if (mChart.getData() != null &&

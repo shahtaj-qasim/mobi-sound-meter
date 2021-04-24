@@ -8,6 +8,7 @@ import com.rabbitmq.client.ConnectionFactory;
 public class MQConfiguration {
 
     public final static String SENDING_QUEUE = "sendingQueue";
+    public final static String RECEIVING_QUEUE = "receivingQueue";
     public final static String EXCHANGE_NAME = "fanoutExchange";
 
     public static Channel createQueue() {
@@ -18,8 +19,9 @@ public class MQConfiguration {
             channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
             channel.queueDeclare(SENDING_QUEUE, false, false, false, null);
 
-            //channel.queueDeclare(RECEIVING_QUEUE, false, false, false, null);
+            channel.queueDeclare(RECEIVING_QUEUE, false, false, false, null);
             channel.queueBind(SENDING_QUEUE, EXCHANGE_NAME, "");
+            channel.queueBind(RECEIVING_QUEUE, EXCHANGE_NAME, "");
 
             return channel;
         } catch (Exception ex) {
