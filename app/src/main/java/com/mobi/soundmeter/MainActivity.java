@@ -10,6 +10,7 @@ import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.*;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -28,8 +30,14 @@ import com.github.mikephil.charting.formatter.FillFormatter;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
+import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import rabbitmqconfig.MQConfiguration;
@@ -38,14 +46,15 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.google.firebase.database.*;
 
 
+import static android.content.ContentValues.TAG;
 import static rabbitmqconfig.MQConfiguration.*;
 
 public class MainActivity extends Activity {
@@ -56,6 +65,8 @@ public class MainActivity extends Activity {
     ImageButton infoButton;
     ImageButton refreshButton, Health;
     Button saveDataButton, stopButton;
+
+    Button viewAnalysis;
     LineChart mChart;
     TextView minVal;
     TextView maxVal;
@@ -85,8 +96,12 @@ public class MainActivity extends Activity {
     String avgResult, sumResult, minResult, maxResult;
     String[] parts;
     String postalCodeResult, cityResult, timestampResult;
-    FirebaseDatabase db= FirebaseDatabase.getInstance();
-    private DatabaseReference root = db.getReference().child("NoiseData");
+    FirebaseFirestore fbStore;
+
+    int iteration =0 ;
+    SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
+
+    Map<String, Object> msg;
 
     final Handler handler = new Handler(){
         @Override
@@ -152,6 +167,54 @@ public class MainActivity extends Activity {
         maxVal=(TextView)findViewById(R.id.maxval);maxVal.setTypeface(tf);
         curVal=(TextView)findViewById(R.id.curval);curVal.setTypeface(tf);
         infoButton=(ImageButton)findViewById(R.id.infobutton);
+
+        viewAnalysis=(Button)findViewById(R.id.buttonViewAnalysis);
+
+        viewAnalysis.setOnClickListener(new View.OnClickListener() {
+            Date date;
+            @Override
+            public void onClick(View view) {
+                //rough - removing afterwards
+                date = new Date(System.currentTimeMillis());
+                fbStore = FirebaseFirestore.getInstance();
+                CollectionReference collectionRef = fbStore.collection("noiseCollection");
+                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
+                                        //msg  = document.getData();
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+
+                date = DateUtils.addDays(new Date(), -1);
+                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
+                                        //msg  = document.getData();
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+
+
+                //end
+            }});
+
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -197,6 +260,7 @@ public class MainActivity extends Activity {
                 saveDataButton.setVisibility(View.VISIBLE);
                 stopClicked = true;
                 //consume from rabbitmq
+                fbStore = FirebaseFirestore.getInstance();
                 Thread thread = new Thread(runnableForConsume);
                 thread.start();
 
@@ -250,9 +314,39 @@ public class MainActivity extends Activity {
                     cityResult = cityResult.replace("[", "");
                     cityResult = cityResult.replace("]", "");
 
+                    //put real time noise decibels in database
+                    Map<String, Object> noiseMap = new HashMap<>();
+                    noiseMap.put("average", Double.parseDouble(avgResult));
+                    noiseMap.put("sum", Double.parseDouble(sumResult));
+                    noiseMap.put("minimum", Double.parseDouble(minResult));
+                    noiseMap.put("maximum", Double.parseDouble(maxResult));
+                    noiseMap.put("postalCode", postalCodeResult);
+                    noiseMap.put("city", cityResult);
+                    Date date = new Date(System.currentTimeMillis());
+                    noiseMap.put("date",formatter.format(date));
+                    fbStore.collection("noiseCollection").
+                            document().
+                            set(noiseMap)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        System.out.print("Successfulllllllllll");
+                                    }
+                                    else{
+                                        Log.d("This", task.getException().getMessage());
+                                    }
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d("This", e.getMessage());
 
-
-                    System.out.println("!!! Received response in client:  '" +avgResult + sumResult + minResult + maxResult + postalCodeResult + cityResult+ timestampResult+"'");
+                               }
+                            });
+                    iteration++;
+                    System.out.println("!!! Received response in client:  "+noiseMap);
                 }, consumerTag -> {
                 });
                 channel.basicCancel(ctag);

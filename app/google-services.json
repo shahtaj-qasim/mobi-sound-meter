@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "839379151294",
-    "project_id": "mobi-soundcity",
-    "storage_bucket": "mobi-soundcity.appspot.com"
+    "project_number": "1040833211773",
+    "project_id": "mobi-soundcity-573bd",
+    "storage_bucket": "mobi-soundcity-573bd.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:839379151294:android:cbe67c74f6d7e1f19871ef",
+        "mobilesdk_app_id": "1:1040833211773:android:b988514c585795e8517014",
         "android_client_info": {
           "package_name": "com.mobi.soundmeter"
         }
       },
       "oauth_client": [
         {
-          "client_id": "839379151294-8juiun2augd6b4nelsqruj8t6vh7bvsq.apps.googleusercontent.com",
+          "client_id": "1040833211773-73lfiiabuv55lr2mgurble5n0me5afdm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.mobi.soundmeter",
@@ -22,20 +22,20 @@
           }
         },
         {
-          "client_id": "839379151294-bhn4sa3qvlqm5ucpgpqfkh63dohk5lfm.apps.googleusercontent.com",
+          "client_id": "1040833211773-7knap0b15f810vg3jd3dtfrsa9c8j0kj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAjZWNCYvtRt5caWu2v3ivA9D2PVFT41Ac"
+          "current_key": "AIzaSyCcACR4PT9PLZ48tUQLkRHD2x7TEqyuyXQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "839379151294-bhn4sa3qvlqm5ucpgpqfkh63dohk5lfm.apps.googleusercontent.com",
+              "client_id": "1040833211773-7knap0b15f810vg3jd3dtfrsa9c8j0kj.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
