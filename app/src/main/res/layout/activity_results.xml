@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+<!--    <ListView-->
+<!--            android:id="@+id/simpleListView"-->
+<!--            android:layout_width="fill_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:divider="@color/material_blue_grey_800"-->
+<!--            android:dividerHeight="1dp" />-->
+
+    <TextView
+            android:id="@+id/textView1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black"
+            android:text="subtext"/>
+
+
+    <TextView
+            android:id="@+id/textView2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black"
+            android:text="subtext"/>
+
+</LinearLayout>

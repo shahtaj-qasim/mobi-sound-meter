@@ -61,6 +61,18 @@
                 android:layout_marginBottom="30dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/health" />
+        <ImageButton
+                android:id="@+id/results"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="right|bottom"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="30dp"
+                android:src="@drawable/analysis1"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:textColor="#fff"/>
+
 
     </FrameLayout>
 
@@ -116,10 +128,10 @@
                     android:textSize="36dp"
                     android:id="@+id/mmval"
                     android:textColor="#ffffff"/>
-            <Button
-                    android:text="View Analysis"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:id="@+id/buttonViewAnalysis"/>
+<!--            <Button-->
+<!--                    android:text="View Analysis"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content" android:id="@+id/buttonViewAnalysis"/>-->
         </LinearLayout>
         <LinearLayout
                 android:orientation="vertical"

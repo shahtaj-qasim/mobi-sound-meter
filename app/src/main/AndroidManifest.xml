@@ -14,14 +14,17 @@
         android:hardwareAccelerated="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.mobi.soundmeter.Dialog"></activity>
-        <activity android:name="com.mobi.soundmeter.Splash">
+        <activity android:name=".List_View"></activity>
+        <activity android:name=".Results"
+                  android:label="History"/>
+        <activity android:name=".Dialog"></activity>
+        <activity android:name=".Splash">
 
         <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.mobi.soundmeter.MainActivity"></activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 </manifest>

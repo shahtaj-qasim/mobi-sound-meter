@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
     ImageButton refreshButton, Health;
     Button saveDataButton, stopButton;
 
-    Button viewAnalysis;
+    ImageButton result;
     LineChart mChart;
     TextView minVal;
     TextView maxVal;
@@ -167,53 +167,54 @@ public class MainActivity extends Activity {
         maxVal=(TextView)findViewById(R.id.maxval);maxVal.setTypeface(tf);
         curVal=(TextView)findViewById(R.id.curval);curVal.setTypeface(tf);
         infoButton=(ImageButton)findViewById(R.id.infobutton);
+        result=findViewById(R.id.results);
 
-        viewAnalysis=(Button)findViewById(R.id.buttonViewAnalysis);
-
-        viewAnalysis.setOnClickListener(new View.OnClickListener() {
-            Date date;
-            @Override
-            public void onClick(View view) {
-                //rough - removing afterwards
-                date = new Date(System.currentTimeMillis());
-                fbStore = FirebaseFirestore.getInstance();
-                CollectionReference collectionRef = fbStore.collection("noiseCollection");
-                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
-                                        //msg  = document.getData();
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
-
-                date = DateUtils.addDays(new Date(), -1);
-                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
-                                        //msg  = document.getData();
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
-
-
-                //end
-            }});
+//        viewAnalysis=(Button)findViewById(R.id.buttonViewAnalysis);
+//
+//        viewAnalysis.setOnClickListener(new View.OnClickListener() {
+//            Date date;
+//            @Override
+//            public void onClick(View view) {
+//                //rough - removing afterwards
+//                date = new Date(System.currentTimeMillis());
+//                fbStore = FirebaseFirestore.getInstance();
+//                CollectionReference collectionRef = fbStore.collection("noiseCollection");
+//                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
+//                        .get()
+//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                if (task.isSuccessful()) {
+//                                    for (QueryDocumentSnapshot document : task.getResult()) {
+//                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
+//                                        //msg  = document.getData();
+//                                    }
+//                                } else {
+//                                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                                }
+//                            }
+//                        });
+//
+//                date = DateUtils.addDays(new Date(), -1);
+//                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
+//                        .get()
+//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                if (task.isSuccessful()) {
+//                                    for (QueryDocumentSnapshot document : task.getResult()) {
+//                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
+//                                        //msg  = document.getData();
+//                                    }
+//                                } else {
+//                                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                                }
+//                            }
+//                        });
+//
+//
+//                //end
+//            }});
 
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,6 +231,15 @@ public class MainActivity extends Activity {
                 builder.create().show();
             }
         });
+
+        result.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, Results.class);
+                MainActivity.this.startActivity(intent);
+            }
+        });
+
 
 
         saveDataButton=(Button)findViewById(R.id.buttonSave);
