@@ -14,9 +14,8 @@
         android:hardwareAccelerated="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".List_View"></activity>
         <activity android:name=".Results"
-                  android:label="History"/>
+                  android:label="History - Highest collected noise values"/>
         <activity android:name=".Dialog"></activity>
         <activity android:name=".Splash">
 

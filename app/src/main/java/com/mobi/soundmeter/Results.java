@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.*;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -24,14 +25,17 @@ import static android.content.ContentValues.TAG;
 public class Results extends AppCompatActivity {
     FirebaseFirestore fbStore;
     SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
-    Date date;
-    String formatted;
-    String zipCode;
+    Date date, currentDate;
+    String formatted, currentFormatted;
+    String zipCode, dbDate;
     String city;
     Map<String, Object> msg;
     String heading;
+    double maximum, average, minimum, sum;
+    DecimalFormat df = new DecimalFormat("#.##");
 
-    TextView textHead1, textHead2, textSub1, textSub2;
+    TextView textHead1, textHead2, textSub1, textSub2, textHead3, textHead4, textHead5, textHead6,textHead7,
+    textSub3, textSub4, textSub5, textSub6, textSub7;
 
 
     @Override
@@ -43,63 +47,56 @@ public class Results extends AppCompatActivity {
         textHead2=(TextView)findViewById(R.id.textView2);
         textSub1=(TextView)findViewById(R.id.textViewSub1);
         textSub2=(TextView)findViewById(R.id.textViewSub2);
+        textHead3=(TextView)findViewById(R.id.textView3);
+        textSub3=(TextView)findViewById(R.id.textViewSub3);
+        textHead4=(TextView)findViewById(R.id.textView4);
+        textSub4=(TextView)findViewById(R.id.textViewSub4);
+        textHead5=(TextView)findViewById(R.id.textView5);
+        textSub5=(TextView)findViewById(R.id.textViewSub5);
+        textHead6=(TextView)findViewById(R.id.textView6);
+        textSub6=(TextView)findViewById(R.id.textViewSub6);
+        textHead7=(TextView)findViewById(R.id.textView7);
+        textSub7=(TextView)findViewById(R.id.textViewSub7);
 
-                date = new Date(System.currentTimeMillis());
+        TextView textHeads[] = {textHead1, textHead2, textHead3, textHead4, textHead5, textHead6, textHead7};
+        TextView textSubs[] = {textSub1, textSub2, textSub3, textSub4, textSub5, textSub6, textSub7};
+
+                currentDate = new Date(System.currentTimeMillis());
                 fbStore = FirebaseFirestore.getInstance();
                 CollectionReference collectionRef = fbStore.collection("noiseCollection");
-                formatted = formatter.format(date);
-                textHead1.setText(formatted+ " -  No data provided");
-                collectionRef.whereEqualTo("date",formatted).orderBy("average", Query.Direction.DESCENDING).limit(1)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        zipCode = document.getString("postalCode");
-                                        city = document.getString("city");
-                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData()+ " "+zipCode);
-                                        //msg  = document.getData();
-                                         String heading1 =formatted+ " - " +zipCode+", "+city;
-                                        textHead1.setText(heading1);
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
+        for(int i=0; i<7; i++) {
+            date = DateUtils.addDays(new Date(), -i);
+            formatted = formatter.format(date);
+            textHeads[i].setText(formatted + " -  No data provided");
+            textSubs[i].setText("No data provided");
+
+
+            int finalI = i;
+            collectionRef.whereEqualTo("date", formatted).orderBy("average", Query.Direction.DESCENDING).limit(1)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    sum = (double) document.get("sum");
+                                    average = (double) document.get("average");
+                                    maximum = (double) document.get("maximum");
+                                    minimum = (double) document.get("minimum");
+                                    Log.d(TAG, "I am maximum average" + document.getId() + " => " + document.getData());
+                                    String heading = document.get("date") + " - " + document.getString("postalCode") + ", " + document.getString("city");
+                                    textHeads[finalI].setText(heading);
+                                    textSubs[finalI].setText("Total: " + Double.valueOf(df.format(sum)) + " dB    "
+                                            + "Maximum: " + Double.valueOf(df.format(maximum)) + " dB    "
+                                            + "Average: " + Double.valueOf(df.format(average)) + " dB    "
+                                            + "Minimum: " + Double.valueOf(df.format(minimum)) + " dB");
                                 }
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
                             }
-                        });
-                date = DateUtils.addDays(new Date(), -1);
-                formatted = formatter.format(date);
-                textHead2.setText(formatted+ " -  No data provided");
-                collectionRef.whereEqualTo("date",formatted).orderBy("average", Query.Direction.DESCENDING).limit(1)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                            zipCode = document.getString("postalCode");
-                                            city = document.getString("city");
-                                            Log.d(TAG, "I am maximum average" + document.getId() + " => " + document.getData() + " " + zipCode);
-                                            msg = document.getData();
-                                            String heading2 = formatted + " - " + zipCode + ", " + city;
-                                            textHead2.setText(heading2);
-                                    }
+                        }
+                    });
+        }
 
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
-
-
-
-     //   ListView simpleList;
-//        String Results[] = {results[0], results[1], "Result 3", "Result 4", "Result 5", "Result 6"};
-//        simpleList = (ListView)findViewById(R.id.simpleListView);
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_list_view, R.id.textView, Results);
-//        simpleList.setAdapter(arrayAdapter);
     }
-
-
 }

@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent" android:layout_height="fill_parent">
+<LinearLayout android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
-
-<!--    <ListView-->
-<!--            android:id="@+id/simpleListView"-->
-<!--            android:layout_width="fill_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:divider="@color/material_blue_grey_800"-->
-<!--            android:dividerHeight="1dp" />-->
 
     <TextView
             android:id="@+id/textView1"
@@ -25,8 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="@dimen/activity_horizontal_margin"
-            android:textColor="@color/black"
-            android:text="subtext"/>
+            android:textColor="@color/black"/>
 
 
     <TextView
@@ -43,7 +36,87 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="@dimen/activity_horizontal_margin"
-            android:textColor="@color/black"
-            android:text="subtext"/>
+            android:textColor="@color/black"/>
+
+    <TextView
+            android:id="@+id/textView3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:textColor="@color/black"/>
+
+    <TextView
+            android:id="@+id/textView4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:textColor="@color/black"/>
+
+    <TextView
+            android:id="@+id/textView5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:textColor="@color/black"/>
+
+    <TextView
+            android:id="@+id/textView6"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub6"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:textColor="@color/black"/>
+
+    <TextView
+            android:id="@+id/textView7"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textColor="@color/black" />
+    <TextView
+            android:id="@+id/textViewSub7"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:textColor="@color/black"/>
 
 </LinearLayout>
+</ScrollView>

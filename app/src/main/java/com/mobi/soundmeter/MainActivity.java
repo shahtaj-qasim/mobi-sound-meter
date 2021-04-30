@@ -169,53 +169,6 @@ public class MainActivity extends Activity {
         infoButton=(ImageButton)findViewById(R.id.infobutton);
         result=findViewById(R.id.results);
 
-//        viewAnalysis=(Button)findViewById(R.id.buttonViewAnalysis);
-//
-//        viewAnalysis.setOnClickListener(new View.OnClickListener() {
-//            Date date;
-//            @Override
-//            public void onClick(View view) {
-//                //rough - removing afterwards
-//                date = new Date(System.currentTimeMillis());
-//                fbStore = FirebaseFirestore.getInstance();
-//                CollectionReference collectionRef = fbStore.collection("noiseCollection");
-//                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
-//                        .get()
-//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                            @Override
-//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                                if (task.isSuccessful()) {
-//                                    for (QueryDocumentSnapshot document : task.getResult()) {
-//                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
-//                                        //msg  = document.getData();
-//                                    }
-//                                } else {
-//                                    Log.d(TAG, "Error getting documents: ", task.getException());
-//                                }
-//                            }
-//                        });
-//
-//                date = DateUtils.addDays(new Date(), -1);
-//                collectionRef.whereEqualTo("date",formatter.format(date)).orderBy("average", Query.Direction.DESCENDING).limit(1)
-//                        .get()
-//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                            @Override
-//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                                if (task.isSuccessful()) {
-//                                    for (QueryDocumentSnapshot document : task.getResult()) {
-//                                        Log.d(TAG, "I am maximum average"+ document.getId() + " => " + document.getData());
-//                                        //msg  = document.getData();
-//                                    }
-//                                } else {
-//                                    Log.d(TAG, "Error getting documents: ", task.getException());
-//                                }
-//                            }
-//                        });
-//
-//
-//                //end
-//            }});
-
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
