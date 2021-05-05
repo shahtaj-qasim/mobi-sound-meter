@@ -1,0 +1,33 @@
+#REQUIRED de.uniol.inf.is.odysseus.wrapper.rabbitmq.feature.feature.group
+#PARSER PQL
+#RUNQUERY
+///Your first pql-query here
+/// Receive elements from bus (work queue)
+input = ACCESS({
+            transport='RabbitMQ',
+            source= 'NoiseReceiver',
+            wrapper='GenericPush',
+            protocol='JSON',
+            datahandler='KeyValueObject',
+            options=[
+              ['EXCHANGE_NAME','fanoutExchange'],
+              ['PUBLISH_STYLE','publishsubscribe'],
+              ['QUEUE_NAME','sendingQueue'],
+              ['CONSUMER_TAG','	bcc2c175-b563-40ca-b1d7-6ce0009a5914'],
+              ['HOST','localhost'],
+              ['ByteOrder', 'Little_Endian']
+            ],
+             schema=[
+              ['timestamp', 'STARTTIMESTAMP'],
+              ['id', 'INTEGER'],
+              ['minimumValue', 'DOUBLE'],
+              ['averageValue', 'DOUBLE'],
+              ['maximumValue', 'DOUBLE'],
+              ['realTimeValue', 'DOUBLE'],
+              ['latitude', 'DOUBLE'],
+              ['longitude', 'DOUBLE'],
+              ['postalCode', 'STRING'],
+              ['city', 'STRING']
+            ]                                           
+          }               
+        )
