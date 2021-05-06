@@ -1,0 +1,70 @@
+#PARSER PQL
+#RUNQUERY
+///Your first pql-query here
+out = TOTUPLE({
+    schema=[['timestamp', 'STARTTIMESTAMP'], 
+    ['id', 'INTEGER'],
+    ['minimumValue', 'DOUBLE'],
+    ['averageValue', 'DOUBLE'],
+    ['maximumValue', 'DOUBLE'],
+    ['realTimeValue', 'DOUBLE'],
+    ['latitude', 'DOUBLE'],
+    ['longitude', 'DOUBLE'],
+    ['postalCode', 'STRING'],
+    ['city', 'STRING']],
+    type='Measurement'
+    },
+    System.NoiseReceiver
+ )
+ 
+
+///filtering data
+output = SELECT({
+                 predicate='realTimeValue > 60.00'
+                }, out)
+ 
+/// element window
+windowed = ELEMENTWINDOW({SIZE=50}, output)
+
+outputWindowed = AGGREGATE({
+          aggregations=[
+            ['COUNT', 'realTimeValue', 'COUNT_realTimeValue', 'integer'],
+            ['AVG', 'realTimeValue', 'AVG_realTimeValue'],
+            ['SUM', 'realTimeValue', 'SUM_realTimeValue'],
+            ['MIN', 'realTimeValue', 'MIN_realTimeValue'],
+            ['MAX', 'realTimeValue', 'MAX_realTimeValue'],
+            ['DISTINCTNEST', 'postalCode', 'DISTINCT_postalCode'],
+            ['DISTINCTNEST', 'city', 'DISTINCT_city'],
+             ['LAST', 'timestamp', 'LAST_timestamp']
+          ]               
+        },
+        windowed
+      )
+ 
+ 
+///outsend = SENDER({sink='Sink',
+///wrapper='GenericPush',
+///transport='File',
+///protocol='CSV',
+///dataHandler='Tuple',
+///options=[['filename', 'C:/Users/lenovo/workspace1/Nexmark/output.xlsx']]
+///},outputWindowed)
+
+///tupleToKeyValue = TUPLETOKEYVALUE(outputWindowed)
+
+SEND = SENDER({
+              transport='RabbitMQ', 
+              wrapper='GenericPush',
+              protocol='Line',
+              datahandler='Tuple',
+            SINK="RESULTSENDER",
+           options=[
+            ['EXCHANGE_NAME','fanoutExchange'],
+              ['PUBLISH_STYLE','publishsubscribe'],
+             ['QUEUE_NAME','receivingQueue'],
+             ['HOST','localhost'],
+             ['ByteOrder', 'Little_Endian']
+           ]                       
+         },
+     outputWindowed
+       )
