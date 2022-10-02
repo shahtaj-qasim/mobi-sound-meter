@@ -1,9 +1,10 @@
-# Motivation
+# Sound City Project - Sound Meter
+## Motivation
 1. Transportation, different industries, and construction etc. are expanding more and more
 2. Unawareness about noise pollution
 3. Statisticians or citizens want to learn about noise need efficient, easy and user-friendly system for analysis
 
-# Architecture Overview
+## Architecture Overview
 Application records noise levels in dB using phone microphone and sends the data to RabbitMQ queue. Odysseus accesses the data from RabbitMQ queue and performs necessary operations. Odysseus sends the data back to RabbitMQ queue and the application captures the data from rabbitMQ queue. The processed data is then stored in FireStore, which is then used for querying to get the results in the app.
 
 
